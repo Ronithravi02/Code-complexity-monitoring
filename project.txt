@@ -1,0 +1,135 @@
+from radon.complexity import cc_visit
+from pathlib import Path
+import time
+import os,sys
+import warnings
+warnings.filterwarnings('ignore')
+
+class Calculator:
+    def __init__(self):
+        self.functions = []
+
+    def get_complexity_level(self, overall_complexity):
+        if overall_complexity < 5:
+            return "Easy"
+        elif overall_complexity < 9:
+            return "Moderate"
+        else:
+            return "Complex"
+
+    def calculate_complexity(self, file_path):
+        start_time = time.time()
+
+        with open(file_path, 'r') as file:
+            code = file.read()
+        j = 0
+        c = 0
+        s = " "
+        m = "-"
+        results = cc_visit(code)
+        for result in results:
+            i = len(result.name)
+            if i > j:
+                j = i
+        if j < 8:
+            j = 8
+        print("Function", end="")
+        i = 8
+        i = j + 5 - i
+        print(s * j, end=" ")
+        print("Complexity")
+        print(m * (22 + i))
+        for result in results:
+            i = len(result.name)
+            c += 1
+            print(result.name, end="")
+            i = j + 8 - i
+            print(s * i, end=" ")
+            print(result.complexity, "- ", end="")
+            print(self.get_complexity_level(result.complexity))
+            self.functions.append({'Name': result.name, 'Complexity': result.complexity})
+
+        # Calculate the overall complexity
+        try:
+            overall_complexity = sum(result.complexity for result in results)
+            actual_complexity = overall_complexity / c
+            complexity_level = self.get_complexity_level(actual_complexity)
+            print("\nOverall Complexity Level:", complexity_level)
+        except ZeroDivisionError:
+            print("\nOverall Complexity Level:Easy")
+        # Record end time and calculate elapsed time
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        print("Execution Time:", elapsed_time, "seconds")
+
+if __name__ == "__main__":
+    calculator = Calculator()
+    print("\nWelcome")
+    while True:
+        print("\nMenu:")
+        print("1. Create File")
+        print("2. Read File")
+        print("3. Delete File")
+        print("4. Exit")
+        choice = input("Enter your choice: ")
+        if choice=="1":
+            file_name = input("Enter the file name (including extension): ")
+            if os.path.isfile(file_name):
+                print("File is already existing..")
+                print("Do you want to overwrite it..('y'-Yes or 'n'-No)")
+                ch=input("Enter your choice: ")
+                if ch=="y" or ch=="Y":
+                    f1=open(file_name,'w')
+                    f1.write('')
+                    print("Please open the file and enter the code..")
+                else:
+                    continue
+            else:
+                f1=open(file_name,'w') 
+                i=0
+                print(" Please Wait ")
+                while i<10000000:
+                    i+=1
+                print("Your File has been created. Please open the file and enter the code..")
+        
+
+        elif choice=="2":
+            fname=input("enter the file name ")
+            if os.path.isfile(fname):
+                f1=open(fname,'r')
+            else:
+                print(fname+" file does not exist")
+                sys.exit()
+            #printing the file
+            str2=f1.read()
+            if any(keyword in str2 for keyword in ['def', 'class', 'import', 'print', 'if', 'for', 'while']):
+                print(str2)
+                #finding the complexity
+                print("\n######...Complexity of above File...######")
+                calculator.calculate_complexity(fname)
+                print("\nFunctions and Complexities:")
+                print(calculator.functions)
+            else:
+                print(f"The file '{fname}' does not seem to contain a Python program.")
+                
+        elif choice=="3":
+            file_path=input("Enter the file path you want to delete: ")
+            try:
+                print("Your file is being deleted....")
+                i=0
+                while i<10000000:
+                    i+=1
+                os.remove(file_path)
+                print(f"File '{file_path}' deleted successfully.")
+            except FileNotFoundError:
+                print(f"Error: File '{file_path}' not found.")
+            except Exception as e:
+                print(f"Error: {e}")
+
+        elif choice=="4":
+            print("Exiting the program. Goodbye!")
+            break
+        else:
+            print("Invalid choice.")
+            
+        f1.close()
